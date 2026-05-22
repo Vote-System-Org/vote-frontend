@@ -1,26 +1,33 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
-  Vote, Plus, Play, Square, Trash2,
-  BarChart3, Users, Clock, AlertCircle
-} from 'lucide-react';
-import api from '../../api/axios';
-import type { Scrutin } from '../../types';
+  Vote,
+  Plus,
+  Play,
+  Square,
+  Trash2,
+  BarChart3,
+  Users,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
+import api from "../../api/axios";
+import type { Scrutin } from "../../types";
 
 export default function GestionScrutins() {
-  const [scrutins, setScrutins]     = useState<Scrutin[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState('');
-  const [showForm, setShowForm]     = useState(false);
+  const [scrutins, setScrutins] = useState<Scrutin[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   // Formulaire
-  const [titre, setTitre]               = useState('');
-  const [description, setDescription]   = useState('');
-  const [dateDebut, setDateDebut]       = useState('');
-  const [dateFin, setDateFin]           = useState('');
-  const [filiereCible, setFiliereCible] = useState('');
-  const [niveauCible, setNiveauCible]   = useState('');
-  const [saving, setSaving]             = useState(false);
+  const [titre, setTitre] = useState("");
+  const [description, setDescription] = useState("");
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
+  const [filiereCible, setFiliereCible] = useState("");
+  const [niveauCible, setNiveauCible] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     chargerScrutins();
@@ -28,10 +35,10 @@ export default function GestionScrutins() {
 
   const chargerScrutins = async () => {
     try {
-      const response = await api.get('/admin/scrutins/');
+      const response = await api.get("/admin/scrutins/");
       setScrutins(response.data.results || response.data);
     } catch {
-      setError('Erreur lors du chargement des scrutins.');
+      setError("Erreur lors du chargement des scrutins.");
     } finally {
       setLoading(false);
     }
@@ -40,30 +47,34 @@ export default function GestionScrutins() {
   const creerScrutin = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
+    setError("");
     try {
-      await api.post('/admin/scrutins/', {
+      await api.post("/admin/scrutins/", {
         titre,
         description,
-        date_debut:    dateDebut,
-        date_fin:      dateFin,
+        date_debut: dateDebut,
+        date_fin: dateFin,
         filiere_cible: filiereCible || null,
-        niveau_cible:  niveauCible  || null,
+        niveau_cible: niveauCible || null,
       });
       setShowForm(false);
       resetForm();
       chargerScrutins();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Erreur lors de la création.');
+      setError(error.response?.data?.message || "Erreur lors de la création.");
     } finally {
       setSaving(false);
     }
   };
 
   const resetForm = () => {
-    setTitre(''); setDescription(''); setDateDebut('');
-    setDateFin(''); setFiliereCible(''); setNiveauCible('');
+    setTitre("");
+    setDescription("");
+    setDateDebut("");
+    setDateFin("");
+    setFiliereCible("");
+    setNiveauCible("");
   };
 
   const ouvrir = async (id: number) => {
@@ -72,41 +83,42 @@ export default function GestionScrutins() {
       chargerScrutins();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Erreur ouverture.');
+      setError(error.response?.data?.message || "Erreur ouverture.");
     }
   };
 
   const cloturer = async (id: number) => {
-    if (!confirm('Clôturer ce scrutin ?')) return;
+    if (!confirm("Clôturer ce scrutin ?")) return;
     try {
       await api.post(`/admin/scrutins/${id}/cloturer/`);
       chargerScrutins();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Erreur clôture.');
+      setError(error.response?.data?.message || "Erreur clôture.");
     }
   };
 
   const supprimer = async (id: number) => {
-    if (!confirm('Supprimer ce scrutin ?')) return;
+    if (!confirm("Supprimer ce scrutin ?")) return;
     try {
       await api.delete(`/admin/scrutins/${id}/`);
       chargerScrutins();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Erreur suppression.');
+      setError(error.response?.data?.message || "Erreur suppression.");
     }
   };
 
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit', month: 'short', year: 'numeric',
+    new Date(date).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
-
         {/* Sidebar */}
         <aside className="w-64 min-h-screen bg-blue-900 text-white flex flex-col">
           <div className="p-6 border-b border-blue-800">
@@ -117,26 +129,36 @@ export default function GestionScrutins() {
             <p className="text-blue-300 text-xs mt-1">Administration</p>
           </div>
           <nav className="flex-1 p-4 space-y-1">
-            <Link to="/admin"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors">
+            <Link
+              to="/admin"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors"
+            >
               Tableau de bord
             </Link>
-            <Link to="/admin/scrutins"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-800 text-white text-sm font-medium">
+            <Link
+              to="/admin/scrutins"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-800 text-white text-sm font-medium"
+            >
               <Vote size={18} />
               Scrutins
             </Link>
-            <Link to="/admin/electeurs"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors">
+            <Link
+              to="/admin/electeurs"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors"
+            >
               <Users size={18} />
               Électeurs
             </Link>
-            <Link to="/admin/liste-blanche"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors">
+            <Link
+              to="/admin/liste-blanche"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors"
+            >
               Liste blanche
             </Link>
-            <Link to="/admin/audit"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors">
+            <Link
+              to="/admin/audit"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 text-blue-200 hover:text-white text-sm transition-colors"
+            >
               Logs d'audit
             </Link>
           </nav>
@@ -272,11 +294,14 @@ export default function GestionScrutins() {
                     className="flex items-center gap-2 bg-blue-900 hover:bg-blue-800 disabled:bg-blue-300 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors"
                   >
                     <Plus size={16} />
-                    {saving ? 'Création...' : 'Créer le scrutin'}
+                    {saving ? "Création..." : "Créer le scrutin"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setShowForm(false); resetForm(); }}
+                    onClick={() => {
+                      setShowForm(false);
+                      resetForm();
+                    }}
                     className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Annuler
@@ -297,13 +322,15 @@ export default function GestionScrutins() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                            scrutin.statut === 'OUVERT'
-                              ? 'bg-green-100 text-green-700'
-                              : scrutin.statut === 'BROUILLON'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
+                          <span
+                            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                              scrutin.statut === "OUVERT"
+                                ? "bg-green-100 text-green-700"
+                                : scrutin.statut === "BROUILLON"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
                             {scrutin.statut}
                           </span>
                           {scrutin.filiere_cible && (
@@ -327,23 +354,34 @@ export default function GestionScrutins() {
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock size={12} />
-                            {formatDate(scrutin.date_debut)} → {formatDate(scrutin.date_fin)}
+                            {formatDate(scrutin.date_debut)} →{" "}
+                            {formatDate(scrutin.date_fin)}
                           </span>
                         </div>
                       </div>
 
                       {/* Actions */}
                       <div className="flex items-center gap-2 ml-4">
-                        {scrutin.statut === 'OUVERT' && (
+                        {/* Bouton Candidats — toujours visible sauf CLOTURE */}
+                        {scrutin.statut !== "CLOTURE" && (
                           <Link
-                            to={`/admin/scrutins`}
+                            to={`/admin/scrutins/${scrutin.id}/candidats`}
                             className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            <Users size={14} />
+                            Candidats ({scrutin.nb_candidats})
+                          </Link>
+                        )}
+                        {scrutin.statut === "OUVERT" && (
+                          <Link
+                            to={`/admin/scrutins/${scrutin.id}/resultats`}
+                            className="flex items-center gap-1 text-xs bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors"
                           >
                             <BarChart3 size={14} />
                             Résultats
                           </Link>
                         )}
-                        {scrutin.statut === 'BROUILLON' && (
+                        {scrutin.statut === "BROUILLON" && (
                           <button
                             onClick={() => ouvrir(scrutin.id)}
                             className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors"
@@ -352,7 +390,7 @@ export default function GestionScrutins() {
                             Ouvrir
                           </button>
                         )}
-                        {scrutin.statut === 'OUVERT' && (
+                        {scrutin.statut === "OUVERT" && (
                           <button
                             onClick={() => cloturer(scrutin.id)}
                             className="flex items-center gap-1 text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors"
@@ -361,7 +399,7 @@ export default function GestionScrutins() {
                             Clôturer
                           </button>
                         )}
-                        {scrutin.statut === 'BROUILLON' && (
+                        {scrutin.statut === "BROUILLON" && (
                           <button
                             onClick={() => supprimer(scrutin.id)}
                             className="flex items-center gap-1 text-xs bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"

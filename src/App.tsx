@@ -20,6 +20,7 @@ import GestionScrutins    from './pages/admin/GestionScrutins';
 import GestionElecteurs   from './pages/admin/GestionElecteurs';
 import GestionListeBlanche from './pages/admin/GestionListeBlanche';
 import LogsAudit          from './pages/admin/LogsAudit';
+import GestionCandidats from './pages/admin/GestionCandidats';
 
 // ── Guards ────────────────────────────────────────────────────────────────
 function PrivateRoute({ children }: { children: ReactNode }) {
@@ -72,6 +73,9 @@ function AppRoutes() {
       }/>
       <Route path="/admin/audit" element={
         <AdminRoute><LogsAudit /></AdminRoute>
+      }/>
+      <Route path="/admin/scrutins/:scrutinId/candidats" element={
+        <AdminRoute><GestionCandidats /></AdminRoute>
       }/>
 
       {/* ── Fallback ──────────────────────────────────────────────────── */}
