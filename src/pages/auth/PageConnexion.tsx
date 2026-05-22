@@ -7,19 +7,20 @@ import type { CaptchaData } from '../../types';
 
 export default function PageConnexion() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isAdmin } = useAuth();
 
-  const [username, setUsername]         = useState('');
-  const [password, setPassword]         = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [captcha, setCaptcha]           = useState<CaptchaData | null>(null);
-  const [captchaValue, setCaptchaValue] = useState('');
-  const [error, setError]               = useState('');
-  const [loading, setLoading]           = useState(false);
+  const [username, setUsername]           = useState('');
+  const [password, setPassword]           = useState('');
+  const [showPassword, setShowPassword]   = useState(false);
+  const [captcha, setCaptcha]             = useState<CaptchaData | null>(null);
+  const [captchaValue, setCaptchaValue]   = useState('');
+  const [error, setError]                 = useState('');
+  const [loading, setLoading]             = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/espace/dashboard');
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated && !isAdmin) navigate('/espace/dashboard');
+    if (isAuthenticated && isAdmin)  navigate('/admin');
+  }, [isAuthenticated, isAdmin, navigate]);
 
   useEffect(() => {
     chargerCaptcha();
@@ -41,7 +42,15 @@ export default function PageConnexion() {
     setLoading(true);
     try {
       await login(username, password, captcha?.captcha_key || '', captchaValue);
-      navigate('/espace/dashboard');
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.is_staff) {
+          navigate('/admin');
+        } else {
+          navigate('/espace/dashboard');
+        }
+      }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Identifiants incorrects.');

@@ -25,3 +25,8 @@ dist-ssr
 
 # Environment variables
 .env
+
+
+#Autres
+
+test_liste_blanche.csv

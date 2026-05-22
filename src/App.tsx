@@ -23,9 +23,11 @@ import LogsAudit          from './pages/admin/LogsAudit';
 
 // ── Guards ────────────────────────────────────────────────────────────────
 function PrivateRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
   if (loading) return <div>Chargement...</div>;
-  return isAuthenticated ? <>{children}</> : <Navigate to="/connexion" />;
+  if (!isAuthenticated) return <Navigate to="/connexion" />;
+  if (isAdmin) return <Navigate to="/admin" />;
+  return <>{children}</>;
 }
 
 function AdminRoute({ children }: { children: ReactNode }) {
