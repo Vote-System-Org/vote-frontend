@@ -71,3 +71,7 @@ export default defineConfig([
   },
 ])
 ```
+
+
+Installation de tailwind
+npm install -D tailwindcss @tailwindcss/vite
