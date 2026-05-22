@@ -19,7 +19,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// ── Hook séparé pour éviter le warning fast-refresh ───────────────────────
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
@@ -28,7 +27,6 @@ export function useAuth() {
   return context;
 }
 
-// ── Provider ──────────────────────────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]       = useState<Electeur | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -41,7 +39,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Récupérer le profil de manière asynchrone
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.is_staff) {
+        setIsAdmin(true);
+        setUser({
+          id:         payload.user_id,
+          matricule:  'ADMIN',
+          nom:        'Admin',
+          prenom:     '',
+          email:      '',
+          filiere:    '',
+          niveau:     '',
+          statut:     'ELIGIBLE',
+          a_vote:     false,
+          date_vote:  null,
+          created_at: '',
+        });
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // token invalide
+    }
+
     api.get('/auth/profil/')
       .then((response) => setUser(response.data))
       .catch(() => {
@@ -68,11 +89,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
 
-    const profil = await api.get('/auth/profil/');
-    setUser(profil.data);
-
     const payload = JSON.parse(atob(access.split('.')[1]));
     setIsAdmin(payload.is_staff || false);
+
+    if (!payload.is_staff) {
+      const profil = await api.get('/auth/profil/');
+      setUser(profil.data);
+    } else {
+      setUser({
+        id:         payload.user_id,
+        matricule:  'ADMIN',
+        nom:        'Admin',
+        prenom:     '',
+        email:      '',
+        filiere:    '',
+        niveau:     '',
+        statut:     'ELIGIBLE',
+        a_vote:     false,
+        date_vote:  null,
+        created_at: '',
+      });
+    }
   };
 
   const logout = async () => {
