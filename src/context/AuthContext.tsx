@@ -35,26 +35,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) {
-      Promise.resolve().then(() => setLoading(false));
+      setLoading(false);
       return;
     }
 
-    // Vérifier si admin depuis le token
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.is_staff) {
         setIsAdmin(true);
         setUser({
-          id: payload.user_id,
-          matricule: 'ADMIN',
-          nom: 'Admin',
-          prenom: '',
-          email: '',
-          filiere: '',
-          niveau: '',
-          statut: 'ELIGIBLE',
-          a_vote: false,
-          date_vote: null,
+          id:         payload.user_id,
+          matricule:  'ADMIN',
+          nom:        'Admin',
+          prenom:     '',
+          email:      '',
+          filiere:    '',
+          niveau:     '',
+          statut:     'ELIGIBLE',
+          a_vote:     false,
+          date_vote:  null,
           created_at: '',
         });
         setLoading(false);
@@ -98,16 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(profil.data);
     } else {
       setUser({
-        id: payload.user_id,
-        matricule: 'ADMIN',
-        nom: 'Admin',
-        prenom: '',
-        email: '',
-        filiere: '',
-        niveau: '',
-        statut: 'ELIGIBLE',
-        a_vote: false,
-        date_vote: null,
+        id:         payload.user_id,
+        matricule:  'ADMIN',
+        nom:        'Admin',
+        prenom:     '',
+        email:      '',
+        filiere:    '',
+        niveau:     '',
+        statut:     'ELIGIBLE',
+        a_vote:     false,
+        date_vote:  null,
         created_at: '',
       });
     }
