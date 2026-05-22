@@ -1,122 +1,93 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import type { ReactNode } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+// ── Pages publiques ───────────────────────────────────────────────────────
+import PageAccueil        from './pages/public/PageAccueil';
+import PageConnexion      from './pages/auth/PageConnexion';
+import PageInscription    from './pages/auth/PageInscription';
+import ResultatsPublic    from './pages/public/ResultatsPublic';
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+// ── Pages électeur ────────────────────────────────────────────────────────
+import DashboardElecteur  from './pages/electeur/DashboardElecteur';
+import PageVote           from './pages/electeur/PageVote';
+import PageConfirmation   from './pages/electeur/PageConfirmation';
+import PageRecu           from './pages/electeur/PageRecu';
 
-      <div className="ticks"></div>
+// ── Pages admin ───────────────────────────────────────────────────────────
+import DashboardAdmin     from './pages/admin/DashboardAdmin';
+import GestionScrutins    from './pages/admin/GestionScrutins';
+import GestionElecteurs   from './pages/admin/GestionElecteurs';
+import GestionListeBlanche from './pages/admin/GestionListeBlanche';
+import LogsAudit          from './pages/admin/LogsAudit';
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+// ── Guards ────────────────────────────────────────────────────────────────
+function PrivateRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return <div>Chargement...</div>;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/connexion" />;
 }
 
-export default App
+function AdminRoute({ children }: { children: ReactNode }) {
+  const { isAdmin, loading } = useAuth();
+  if (loading) return <div>Chargement...</div>;
+  return isAdmin ? <>{children}</> : <Navigate to="/espace/dashboard" />;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* ── Publiques ─────────────────────────────────────────────────── */}
+      <Route path="/"                          element={<PageAccueil />} />
+      <Route path="/connexion"                 element={<PageConnexion />} />
+      <Route path="/inscription"               element={<PageInscription />} />
+      <Route path="/resultats/:id"             element={<ResultatsPublic />} />
+
+      {/* ── Électeur ──────────────────────────────────────────────────── */}
+      <Route path="/espace/dashboard" element={
+        <PrivateRoute><DashboardElecteur /></PrivateRoute>
+      }/>
+      <Route path="/espace/scrutin/:id" element={
+        <PrivateRoute><PageVote /></PrivateRoute>
+      }/>
+      <Route path="/espace/scrutin/:id/confirmer" element={
+        <PrivateRoute><PageConfirmation /></PrivateRoute>
+      }/>
+      <Route path="/espace/vote/recu" element={
+        <PrivateRoute><PageRecu /></PrivateRoute>
+      }/>
+
+      {/* ── Admin ─────────────────────────────────────────────────────── */}
+      <Route path="/admin" element={
+        <AdminRoute><DashboardAdmin /></AdminRoute>
+      }/>
+      <Route path="/admin/scrutins" element={
+        <AdminRoute><GestionScrutins /></AdminRoute>
+      }/>
+      <Route path="/admin/electeurs" element={
+        <AdminRoute><GestionElecteurs /></AdminRoute>
+      }/>
+      <Route path="/admin/liste-blanche" element={
+        <AdminRoute><GestionListeBlanche /></AdminRoute>
+      }/>
+      <Route path="/admin/audit" element={
+        <AdminRoute><LogsAudit /></AdminRoute>
+      }/>
+
+      {/* ── Fallback ──────────────────────────────────────────────────── */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
