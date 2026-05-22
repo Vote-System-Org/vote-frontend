@@ -13,6 +13,7 @@ import DashboardElecteur  from './pages/electeur/DashboardElecteur';
 import PageVote           from './pages/electeur/PageVote';
 import PageConfirmation   from './pages/electeur/PageConfirmation';
 import PageRecu           from './pages/electeur/PageRecu';
+import MonProfil from './pages/electeur/MonProfil';
 
 // ── Pages admin ───────────────────────────────────────────────────────────
 import DashboardAdmin     from './pages/admin/DashboardAdmin';
@@ -59,6 +60,9 @@ function AppRoutes() {
       }/>
       <Route path="/espace/vote/recu" element={
         <PrivateRoute><PageRecu /></PrivateRoute>
+      }/>
+      <Route path="/espace/profil" element={
+        <PrivateRoute><MonProfil /></PrivateRoute>
       }/>
 
       {/* ── Admin ─────────────────────────────────────────────────────── */}
