@@ -7,19 +7,20 @@ import type { CaptchaData } from '../../types';
 
 export default function PageConnexion() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isAdmin } = useAuth();
 
-  const [username, setUsername]         = useState('');
-  const [password, setPassword]         = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [captcha, setCaptcha]           = useState<CaptchaData | null>(null);
-  const [captchaValue, setCaptchaValue] = useState('');
-  const [error, setError]               = useState('');
-  const [loading, setLoading]           = useState(false);
+  const [username, setUsername]           = useState('');
+  const [password, setPassword]           = useState('');
+  const [showPassword, setShowPassword]   = useState(false);
+  const [captcha, setCaptcha]             = useState<CaptchaData | null>(null);
+  const [captchaValue, setCaptchaValue]   = useState('');
+  const [error, setError]                 = useState('');
+  const [loading, setLoading]             = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/espace/dashboard');
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated && !isAdmin) navigate('/espace/dashboard');
+    if (isAuthenticated && isAdmin)  navigate('/admin');
+  }, [isAuthenticated, isAdmin, navigate]);
 
   useEffect(() => {
     chargerCaptcha();
@@ -41,7 +42,15 @@ export default function PageConnexion() {
     setLoading(true);
     try {
       await login(username, password, captcha?.captcha_key || '', captchaValue);
-      navigate('/espace/dashboard');
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.is_staff) {
+          navigate('/admin');
+        } else {
+          navigate('/espace/dashboard');
+        }
+      }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Identifiants incorrects.');
@@ -55,7 +64,6 @@ export default function PageConnexion() {
     <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
-        {/* En-tête */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-900 rounded-full mb-4">
             <ShieldCheck className="text-white" size={32} />
@@ -64,17 +72,14 @@ export default function PageConnexion() {
           <p className="text-gray-500 text-sm mt-1">Connectez-vous à votre compte</p>
         </div>
 
-        {/* Erreur */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
             {error}
           </div>
         )}
 
-        {/* Formulaire */}
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Matricule */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Matricule ou Email
@@ -89,7 +94,6 @@ export default function PageConnexion() {
             />
           </div>
 
-          {/* Mot de passe */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Mot de passe
@@ -113,7 +117,6 @@ export default function PageConnexion() {
             </div>
           </div>
 
-          {/* CAPTCHA */}
           {captcha && (
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -145,7 +148,6 @@ export default function PageConnexion() {
             </div>
           )}
 
-          {/* Bouton */}
           <button
             type="submit"
             disabled={loading}
@@ -156,7 +158,6 @@ export default function PageConnexion() {
           </button>
         </form>
 
-        {/* Lien inscription */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Pas encore de compte ?{' '}
           <Link to="/inscription" className="text-blue-900 font-semibold hover:underline">
