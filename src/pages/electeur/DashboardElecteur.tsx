@@ -1,19 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Vote, LogOut, User, Clock, CheckCircle, AlertCircle 
-} from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import api from '../../api/axios';
-import type { Scrutin } from '../../types';
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Vote,
+  LogOut,
+  User,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../api/axios";
+import type { Scrutin } from "../../types";
 
 export default function DashboardElecteur() {
   const { user, logout } = useAuth();
-  const navigate         = useNavigate();
+  const navigate = useNavigate();
 
   const [scrutins, setScrutins] = useState<Scrutin[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     chargerScrutins();
@@ -21,10 +26,10 @@ export default function DashboardElecteur() {
 
   const chargerScrutins = async () => {
     try {
-      const response = await api.get('/electeur/scrutins/');
+      const response = await api.get("/electeur/scrutins/");
       setScrutins(response.data.results || response.data);
     } catch {
-      setError('Erreur lors du chargement des scrutins.');
+      setError("Erreur lors du chargement des scrutins.");
     } finally {
       setLoading(false);
     }
@@ -32,19 +37,21 @@ export default function DashboardElecteur() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/connexion');
+    navigate("/connexion");
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
+    return new Date(date).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       {/* Navbar */}
       <nav className="bg-blue-900 text-white px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -54,11 +61,20 @@ export default function DashboardElecteur() {
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 text-sm">
             <User size={16} />
-            <span>{user?.prenom} {user?.nom}</span>
+            <span>
+              {user?.prenom} {user?.nom}
+            </span>
             <span className="bg-blue-700 px-2 py-0.5 rounded text-xs">
               {user?.filiere} — {user?.niveau}
             </span>
           </div>
+          <Link
+            to="/espace/profil"
+            className="flex items-center gap-2 text-sm text-blue-200 hover:text-white transition-colors"
+          >
+            <User size={16} />
+            Mon profil
+          </Link>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-sm hover:text-red-300 transition-colors"
@@ -71,7 +87,6 @@ export default function DashboardElecteur() {
 
       {/* Contenu */}
       <div className="max-w-4xl mx-auto px-6 py-10">
-
         {/* Titre */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-blue-900">
