@@ -56,6 +56,7 @@ export interface Candidat {
   scrutin: number;
   nom: string;
   prenom: string | null;
+  email: string | null;
   photo: string | null;
   programme: string | null;
   est_vote_blanc: boolean;
