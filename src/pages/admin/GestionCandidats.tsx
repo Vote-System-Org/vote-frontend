@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   Users, Vote, FileText, ShieldCheck,
-  Plus, Trash2, AlertCircle, User, ArrowLeft
+  Plus, Trash2, AlertCircle, ArrowLeft
 } from 'lucide-react';
 import api from '../../api/axios';
 import type { Candidat, Scrutin } from '../../types';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Vote, ArrowLeft, User, CheckSquare } from 'lucide-react';
+import { Vote, ArrowLeft, CheckSquare } from 'lucide-react';
 import api from '../../api/axios';
 import type { Scrutin, Candidat } from '../../types';
 
