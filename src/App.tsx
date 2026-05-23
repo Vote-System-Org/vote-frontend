@@ -9,6 +9,7 @@ import PageInscription    from './pages/auth/PageInscription';
 import ResultatsPublic    from './pages/public/ResultatsPublic';
 import PageResetPassword   from './pages/auth/PageResetPassword';
 import PageConfirmPassword from './pages/auth/PageConfirmPassword';
+import VerifierVote from './pages/public/VerifierVote';
 
 // ── Pages électeur ────────────────────────────────────────────────────────
 import DashboardElecteur  from './pages/electeur/DashboardElecteur';
@@ -52,6 +53,8 @@ function AppRoutes() {
       <Route path="/resultats/:id"             element={<ResultatsPublic />} />
       <Route path="/mot-de-passe/reset"    element={<PageResetPassword />} />
       <Route path="/mot-de-passe/confirmer" element={<PageConfirmPassword />} />
+      <Route path="/verifier-vote" element={<VerifierVote />} />
+      
 
       {/* ── Électeur ──────────────────────────────────────────────────── */}
       <Route path="/espace/dashboard" element={
