@@ -7,6 +7,8 @@ import PageAccueil        from './pages/public/PageAccueil';
 import PageConnexion      from './pages/auth/PageConnexion';
 import PageInscription    from './pages/auth/PageInscription';
 import ResultatsPublic    from './pages/public/ResultatsPublic';
+import PageResetPassword   from './pages/auth/PageResetPassword';
+import PageConfirmPassword from './pages/auth/PageConfirmPassword';
 
 // ── Pages électeur ────────────────────────────────────────────────────────
 import DashboardElecteur  from './pages/electeur/DashboardElecteur';
@@ -48,6 +50,8 @@ function AppRoutes() {
       <Route path="/connexion"                 element={<PageConnexion />} />
       <Route path="/inscription"               element={<PageInscription />} />
       <Route path="/resultats/:id"             element={<ResultatsPublic />} />
+      <Route path="/mot-de-passe/reset"    element={<PageResetPassword />} />
+      <Route path="/mot-de-passe/confirmer" element={<PageConfirmPassword />} />
 
       {/* ── Électeur ──────────────────────────────────────────────────── */}
       <Route path="/espace/dashboard" element={
