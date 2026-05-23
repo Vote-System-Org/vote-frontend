@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Vote, FileText,
-  LogOut, ShieldCheck, TrendingUp, Clock,
+  LogOut, ShieldCheck, Clock,
   BarChart3, ChevronRight, Activity
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
