@@ -2,20 +2,23 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   BarChart3, Users, CheckCircle,
-  ArrowLeft, ShieldCheck
+  ArrowLeft, ShieldCheck, Trophy,
+  Hash, Clock
 } from 'lucide-react';
 import api from '../../api/axios';
 import type { Resultats } from '../../types';
 import GraphiqueResultats from '../../components/GraphiqueResultats';
 
 export default function ResultatsPublic() {
-  const { id }                      = useParams();
-  const [resultats, setResultats]   = useState<Resultats | null>(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState('');
+  const { id }                    = useParams();
+  const [resultats, setResultats] = useState<Resultats | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState('');
+  const [visible, setVisible]     = useState(false);
 
   useEffect(() => {
     chargerResultats();
+    setTimeout(() => setVisible(true), 100);
   }, [id]);
 
   const chargerResultats = async () => {
@@ -23,96 +26,122 @@ export default function ResultatsPublic() {
       const response = await api.get(`/public/scrutins/${id}/resultats/`);
       setResultats(response.data.data);
     } catch {
-      setError('Résultats non disponibles. Le scrutin n\'est peut-être pas encore clôturé.');
+      setError("Résultats non disponibles. Le scrutin n'est peut-être pas encore clôturé.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400">Chargement des résultats...</p>
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-white/60 text-sm">Chargement des résultats...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (error || !resultats) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-sm p-8 max-w-md text-center">
-          <BarChart3 className="mx-auto text-gray-300 mb-4" size={48} />
-          <p className="text-gray-600 font-medium">{error}</p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 mt-6 text-blue-900 font-semibold hover:underline text-sm"
-          >
-            <ArrowLeft size={16} />
-            Retour à l'accueil
-          </Link>
+  if (error || !resultats) return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <BarChart3 className="text-gray-300" size={32} />
         </div>
+        <p className="text-gray-700 font-semibold mb-2">Résultats indisponibles</p>
+        <p className="text-gray-400 text-sm mb-6">{error}</p>
+        <Link to="/"
+          className="inline-flex items-center gap-2 bg-blue-900 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-800 transition-colors text-sm">
+          <ArrowLeft size={16} />
+          Retour à l'accueil
+        </Link>
       </div>
-    );
-  }
+    </div>
+  );
 
   const candidatsReels = resultats.resultats.filter(r => !r.est_vote_blanc);
   const voteBlanc      = resultats.resultats.find(r => r.est_vote_blanc);
-  const gagnant        = candidatsReels.reduce((a, b) =>
-    a.nb_voix > b.nb_voix ? a : b, candidatsReels[0]);
+  const maxVoix        = Math.max(...candidatsReels.map(c => c.nb_voix), 1);
+  const gagnant        = candidatsReels.length > 0
+    ? candidatsReels.reduce((a, b) => a.nb_voix > b.nb_voix ? a : b)
+    : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 relative overflow-hidden">
+
+      {/* Cercles décoratifs */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-5">
-        <div className="flex items-center gap-3">
-          <ShieldCheck className="text-white" size={24} />
+      <nav className="relative z-10 flex items-center justify-between px-4 md:px-8 py-5 border-b border-white/10">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center group-hover:bg-white/25 transition-colors">
+            <ShieldCheck className="text-white" size={18} />
+          </div>
           <span className="text-white font-bold">VoteSystem</span>
-        </div>
-        <Link
-          to="/"
-          className="flex items-center gap-2 text-white text-sm hover:text-blue-200 transition-colors"
-        >
-          <ArrowLeft size={16} />
+        </Link>
+        <Link to="/"
+          className="flex items-center gap-2 text-blue-200 hover:text-white text-sm transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg">
+          <ArrowLeft size={15} />
           Accueil
         </Link>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-6 py-10">
+      <div className={`max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12 relative z-10 transition-all duration-700 ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+      }`}>
 
-        {/* Titre */}
-        <div className="text-center mb-8">
-          <span className="bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+        {/* En-tête */}
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full border border-white/20 mb-5">
+            <CheckCircle size={13} />
             SCRUTIN CLÔTURÉ
           </span>
-          <h1 className="text-3xl font-bold text-white mt-4 mb-2">
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-3 leading-tight">
             {resultats.titre}
           </h1>
+          <div className="flex items-center justify-center gap-2 text-blue-300 text-xs">
+            <Hash size={12} />
+            <span>Résultats certifiés SHA-256</span>
+          </div>
         </div>
 
         {/* Stats participation */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white/10 rounded-xl p-5 text-center text-white">
-            <Users className="mx-auto mb-2" size={24} />
-            <p className="text-2xl font-bold">{resultats.nb_eligibles}</p>
-            <p className="text-blue-200 text-sm">Éligibles</p>
-          </div>
-          <div className="bg-white/10 rounded-xl p-5 text-center text-white">
-            <CheckCircle className="mx-auto mb-2" size={24} />
-            <p className="text-2xl font-bold">{resultats.nb_votants}</p>
-            <p className="text-blue-200 text-sm">Votants</p>
-          </div>
-          <div className="bg-white/10 rounded-xl p-5 text-center text-white">
-            <BarChart3 className="mx-auto mb-2" size={24} />
-            <p className="text-2xl font-bold">{resultats.taux_participation}%</p>
-            <p className="text-blue-200 text-sm">Participation</p>
-          </div>
+        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
+          {[
+            { icon: <Users size={20} />, value: resultats.nb_eligibles, label: 'Éligibles' },
+            { icon: <CheckCircle size={20} />, value: resultats.nb_votants, label: 'Votants' },
+            { icon: <BarChart3 size={20} />, value: `${resultats.taux_participation}%`, label: 'Participation' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white/10 backdrop-blur rounded-2xl p-4 md:p-5 text-center text-white border border-white/10 hover:bg-white/15 transition-colors">
+              <div className="flex justify-center mb-2 text-blue-300">{stat.icon}</div>
+              <p className="text-2xl md:text-3xl font-bold">{stat.value}</p>
+              <p className="text-blue-300 text-xs mt-1">{stat.label}</p>
+            </div>
+          ))}
         </div>
 
+        {/* Gagnant — affiché en premier */}
+        {gagnant && gagnant.nb_voix > 0 && (
+          <div className="bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl p-6 md:p-7 text-center mb-6 shadow-xl">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-white/30 rounded-full mb-4">
+              <Trophy className="text-white" size={28} />
+            </div>
+            <p className="text-amber-900 text-sm font-semibold mb-1 uppercase tracking-wider">
+              Élu(e)
+            </p>
+            <p className="text-2xl md:text-3xl font-bold text-white mb-1">
+              {gagnant.nom} {gagnant.prenom || ''}
+            </p>
+            <p className="text-amber-100 font-semibold">
+              {gagnant.nb_voix} voix — {gagnant.pourcentage}%
+            </p>
+          </div>
+        )}
+
         {/* Graphique */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6"
-          data-aos="fade-up">
-          <h2 className="font-bold text-gray-800 mb-6 text-center">
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-5">
+          <h2 className="font-bold text-gray-800 mb-6 text-center text-lg">
             Répartition des votes
           </h2>
           <GraphiqueResultats
@@ -121,37 +150,36 @@ export default function ResultatsPublic() {
           />
         </div>
 
-        {/* Résultats candidats */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <h2 className="font-bold text-gray-800 mb-6">Résultats par candidat</h2>
-          <div className="space-y-4">
+        {/* Résultats détaillés */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-5">
+          <h2 className="font-bold text-gray-800 mb-6 text-lg">Résultats par candidat</h2>
+          <div className="space-y-5">
             {candidatsReels
               .sort((a, b) => b.nb_voix - a.nb_voix)
               .map((candidat, index) => (
                 <div key={candidat.candidat_id}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-3">
-                      {index === 0 && (
-                        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {index === 0 && candidat.nb_voix > 0 && (
+                        <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
                           1er
                         </span>
                       )}
-                      <span className="font-semibold text-gray-800 text-sm">
+                      <span className="font-semibold text-gray-800 text-sm truncate">
                         {candidat.nom} {candidat.prenom || ''}
                       </span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0 ml-3">
                       <span className="font-bold text-blue-900">{candidat.nb_voix}</span>
-                      <span className="text-gray-400 text-sm ml-1">
-                        ({candidat.pourcentage}%)
-                      </span>
+                      <span className="text-gray-400 text-sm ml-1">({candidat.pourcentage}%)</span>
                     </div>
                   </div>
-                  {/* Barre de progression */}
-                  <div className="w-full bg-gray-100 rounded-full h-2.5">
+                  <div className="w-full bg-gray-100 rounded-full h-3">
                     <div
-                      className="bg-blue-900 h-2.5 rounded-full transition-all"
-                      style={{ width: `${candidat.pourcentage}%` }}
+                      className={`h-3 rounded-full transition-all duration-700 ${
+                        index === 0 ? 'bg-blue-900' : 'bg-blue-400'
+                      }`}
+                      style={{ width: `${maxVoix > 0 ? (candidat.nb_voix / maxVoix) * 100 : 0}%` }}
                     />
                   </div>
                 </div>
@@ -161,52 +189,35 @@ export default function ResultatsPublic() {
 
           {/* Vote blanc */}
           {voteBlanc && (
-            <div className="mt-6 pt-6 border-t border-gray-100">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-gray-500 text-sm">Vote blanc</span>
-                <div className="text-right">
+            <div className="mt-6 pt-5 border-t border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-gray-500 text-sm font-medium">Vote blanc</span>
+                <div>
                   <span className="font-bold text-gray-500">{voteBlanc.nb_voix}</span>
-                  <span className="text-gray-400 text-sm ml-1">
-                    ({voteBlanc.pourcentage}%)
-                  </span>
+                  <span className="text-gray-400 text-sm ml-1">({voteBlanc.pourcentage}%)</span>
                 </div>
               </div>
               <div className="w-full bg-gray-100 rounded-full h-2">
-                <div
-                  className="bg-gray-400 h-2 rounded-full"
-                  style={{ width: `${voteBlanc.pourcentage}%` }}
-                />
+                <div className="bg-gray-300 h-2 rounded-full"
+                  style={{ width: `${voteBlanc.pourcentage}%` }} />
               </div>
             </div>
           )}
 
           {/* Abstentions */}
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-400">Abstentions</span>
-              <span className="text-gray-400">{resultats.nb_abstentions}</span>
-            </div>
+          <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between text-sm text-gray-400">
+            <span>Abstentions</span>
+            <span className="font-medium">{resultats.nb_abstentions}</span>
           </div>
         </div>
 
-        {/* Gagnant */}
-        {gagnant && gagnant.nb_voix > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
-            <CheckCircle className="mx-auto text-amber-500 mb-3" size={32} />
-            <p className="text-gray-500 text-sm mb-1">Élu(e)</p>
-            <p className="text-2xl font-bold text-gray-800">
-              {gagnant.nom} {gagnant.prenom || ''}
-            </p>
-            <p className="text-amber-600 font-semibold mt-1">
-              {gagnant.nb_voix} voix — {gagnant.pourcentage}%
-            </p>
-          </div>
-        )}
-
         {/* Footer */}
-        <p className="text-center text-blue-300 text-xs mt-8">
-          Résultats certifiés par hash chain SHA-256 — VoteSystem
-        </p>
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 text-blue-200 text-xs px-4 py-2 rounded-full border border-white/10">
+            <Clock size={12} />
+            Résultats certifiés et immuables — VoteSystem 2025-2026
+          </div>
+        </div>
       </div>
     </div>
   );
