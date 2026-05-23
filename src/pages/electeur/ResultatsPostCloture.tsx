@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { BarChart3, ArrowLeft, Users, CheckCircle, Vote } from 'lucide-react';
 import api from '../../api/axios';
 import type { Resultats } from '../../types';
+import GraphiqueResultats from '../../components/GraphiqueResultats';
 
 export default function ResultatsPostCloture() {
   const { id }                          = useParams();
@@ -101,6 +102,18 @@ export default function ResultatsPostCloture() {
             </p>
             <p className="text-gray-500 text-sm">Participation</p>
           </div>
+        </div>
+
+        {/* Graphique */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6"
+          data-aos="fade-up">
+          <h2 className="font-bold text-gray-800 mb-6 text-center">
+            Répartition des votes
+          </h2>
+          <GraphiqueResultats
+            resultats={resultats.resultats}
+            nbAbstentions={resultats.nb_abstentions}
+          />
         </div>
 
         {/* Résultats */}

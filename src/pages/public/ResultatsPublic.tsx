@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import api from '../../api/axios';
 import type { Resultats } from '../../types';
+import GraphiqueResultats from '../../components/GraphiqueResultats';
 
 export default function ResultatsPublic() {
   const { id }                      = useParams();
@@ -106,6 +107,18 @@ export default function ResultatsPublic() {
             <p className="text-2xl font-bold">{resultats.taux_participation}%</p>
             <p className="text-blue-200 text-sm">Participation</p>
           </div>
+        </div>
+
+        {/* Graphique */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6"
+          data-aos="fade-up">
+          <h2 className="font-bold text-gray-800 mb-6 text-center">
+            Répartition des votes
+          </h2>
+          <GraphiqueResultats
+            resultats={resultats.resultats}
+            nbAbstentions={resultats.nb_abstentions}
+          />
         </div>
 
         {/* Résultats candidats */}
