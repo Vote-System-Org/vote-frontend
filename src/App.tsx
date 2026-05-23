@@ -30,6 +30,7 @@ import GestionListeBlanche from './pages/admin/GestionListeBlanche';
 import LogsAudit          from './pages/admin/LogsAudit';
 import GestionCandidats from './pages/admin/GestionCandidats';
 import ResultatsScrutin from './pages/admin/ResultatsScrutin';
+import QRCodes from './pages/admin/QRCodes';
 
 // ── Guards ────────────────────────────────────────────────────────────────
 function PrivateRoute({ children }: { children: ReactNode }) {
@@ -97,6 +98,9 @@ function AppRoutes() {
       }/>
       <Route path="/admin/scrutins/:scrutinId/resultats" element={
         <AdminRoute><ResultatsScrutin /></AdminRoute>
+      }/>
+      <Route path="/admin/qrcodes" element={
+        <AdminRoute><QRCodes /></AdminRoute>
       }/>
 
       {/* ── Fallback ──────────────────────────────────────────────────── */}
