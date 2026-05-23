@@ -278,17 +278,21 @@ export default function GestionCandidats() {
                   {candidatsReels.map((candidat) => (
                     <div key={candidat.id} className="p-6 flex items-start gap-4">
                       {/* Photo */}
-                      <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {candidat.photo ? (
-                          <img
-                            src={candidat.photo}
-                            alt={candidat.nom}
-                            className="w-14 h-14 object-cover rounded-full"
-                          />
-                        ) : (
-                          <User size={24} className="text-blue-700" />
-                        )}
-                      </div>
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-blue-100 shadow-sm">
+  {candidat.photo ? (
+    <img
+      src={candidat.photo}
+      alt={`${candidat.nom} ${candidat.prenom || ''}`}
+      className="w-14 h-14 rounded-full object-cover object-center"
+    />
+  ) : (
+    <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-700 rounded-full flex items-center justify-center">
+      <span className="text-white font-bold text-lg">
+        {candidat.nom.charAt(0)}
+      </span>
+    </div>
+  )}
+</div>
 
                       {/* Infos */}
                       <div className="flex-1">
