@@ -10,6 +10,7 @@ import ResultatsPublic    from './pages/public/ResultatsPublic';
 import PageResetPassword   from './pages/auth/PageResetPassword';
 import PageConfirmPassword from './pages/auth/PageConfirmPassword';
 import VerifierVote from './pages/public/VerifierVote';
+import QRCodePlateforme from './pages/public/QRCodePlateforme';
 
 
 // ── Pages électeur ────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ function AppRoutes() {
       <Route path="/mot-de-passe/reset"    element={<PageResetPassword />} />
       <Route path="/mot-de-passe/confirmer" element={<PageConfirmPassword />} />
       <Route path="/verifier-vote" element={<VerifierVote />} />
+      <Route path="/qrcode" element={<QRCodePlateforme />} />
       
 
       {/* ── Électeur ──────────────────────────────────────────────────── */}
