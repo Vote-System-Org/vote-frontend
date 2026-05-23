@@ -10,8 +10,8 @@ import api from '../../api/axios';
 import type { Scrutin } from '../../types';
 
 export default function GestionScrutins() {
-  const { logout }   = useNavigate ? useAuth() : useAuth();
-  const navigate     = useNavigate();
+ const { logout } = useAuth();
+ const navigate   = useNavigate();
 
   const [scrutins, setScrutins]     = useState<Scrutin[]>([]);
   const [loading, setLoading]       = useState(true);
