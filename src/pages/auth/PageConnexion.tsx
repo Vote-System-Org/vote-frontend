@@ -156,6 +156,14 @@ export default function PageConnexion() {
             <LogIn size={18} />
             {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
+          <div className="text-center mt-3">
+          <Link
+            to="/mot-de-passe/reset"
+            className="text-sm text-gray-400 hover:text-blue-900 transition-colors"
+          >
+            Mot de passe oublié ?
+          </Link>
+</div>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
