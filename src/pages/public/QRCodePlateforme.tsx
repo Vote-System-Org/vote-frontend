@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
+import { QRCodeSVG,} from 'qrcode.react';
 import { ShieldCheck, Link2, ExternalLink, Download, Share2 } from 'lucide-react';
 
 const URL_PLATEFORME = 'https://vote-frontend-phi.vercel.app';
