@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Users, Vote, FileText, ShieldCheck,
   Plus, Trash2, AlertCircle, ArrowLeft,
-  LayoutDashboard, LogOut, User
+  LayoutDashboard, LogOut, User, Mail
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
@@ -14,19 +14,20 @@ export default function GestionCandidats() {
   const { logout }     = useAuth();
   const navigate       = useNavigate();
 
-  const [scrutin, setScrutin]       = useState<Scrutin | null>(null);
-  const [candidats, setCandidats]   = useState<Candidat[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState('');
-  const [success, setSuccess]       = useState('');
-  const [showForm, setShowForm]     = useState(false);
+  const [scrutin, setScrutin]         = useState<Scrutin | null>(null);
+  const [candidats, setCandidats]     = useState<Candidat[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState('');
+  const [success, setSuccess]         = useState('');
+  const [showForm, setShowForm]       = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [nom, setNom]               = useState('');
-  const [prenom, setPrenom]         = useState('');
-  const [programme, setProgramme]   = useState('');
-  const [photo, setPhoto]           = useState<File | null>(null);
-  const [saving, setSaving]         = useState(false);
+  const [nom, setNom]             = useState('');
+  const [prenom, setPrenom]       = useState('');
+  const [email, setEmail]         = useState('');
+  const [programme, setProgramme] = useState('');
+  const [photo, setPhoto]         = useState<File | null>(null);
+  const [saving, setSaving]       = useState(false);
 
   useEffect(() => { chargerDonnees(); }, [scrutinId]);
 
@@ -45,6 +46,10 @@ export default function GestionCandidats() {
     }
   };
 
+  const resetForm = () => {
+    setNom(''); setPrenom(''); setEmail(''); setProgramme(''); setPhoto(null);
+  };
+
   const ajouterCandidat = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -54,6 +59,7 @@ export default function GestionCandidats() {
       formData.append('scrutin', scrutinId!);
       formData.append('nom', nom);
       formData.append('prenom', prenom);
+      if (email) formData.append('email', email);
       formData.append('programme', programme);
       if (photo) formData.append('photo', photo);
       await api.post('/admin/candidats/', formData, {
@@ -61,7 +67,7 @@ export default function GestionCandidats() {
       });
       setSuccess('Candidat ajouté avec succès !');
       setShowForm(false);
-      setNom(''); setPrenom(''); setProgramme(''); setPhoto(null);
+      resetForm();
       chargerDonnees();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
@@ -218,6 +224,8 @@ export default function GestionCandidats() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 mb-6">
               <h2 className="font-bold text-gray-800 mb-6">Nouveau candidat</h2>
               <form onSubmit={ajouterCandidat} className="space-y-4">
+
+                {/* Nom + Prénom */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Nom *</label>
@@ -235,6 +243,28 @@ export default function GestionCandidats() {
                   </div>
                 </div>
 
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Email du candidat
+                    <span className="text-gray-400 font-normal ml-1">(optionnel)</span>
+                  </label>
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="email" value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="candidat@email.com" />
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <Mail size={11} className="text-blue-400" />
+                    <p className="text-blue-500 text-xs">
+                      Les résultats seront envoyés à cet email à la clôture du scrutin.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Programme */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Programme électoral
@@ -245,9 +275,11 @@ export default function GestionCandidats() {
                     rows={3} placeholder="Programme du candidat..." />
                 </div>
 
+                {/* Photo */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Photo (optionnel)
+                    Photo
+                    <span className="text-gray-400 font-normal ml-1">(optionnel)</span>
                   </label>
                   <input type="file" accept="image/jpeg,image/png"
                     onChange={(e) => setPhoto(e.target.files?.[0] || null)}
@@ -255,14 +287,21 @@ export default function GestionCandidats() {
                   <p className="text-gray-400 text-xs mt-1">JPEG ou PNG — max 2 Mo</p>
                 </div>
 
+                {/* Boutons */}
                 <div className="flex flex-wrap gap-3 pt-2">
                   <button type="submit" disabled={saving}
                     className="flex items-center gap-2 bg-blue-900 hover:bg-blue-800 disabled:bg-gray-300 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">
-                    <Plus size={16} />
-                    {saving ? 'Ajout...' : 'Ajouter'}
+                    {saving ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Ajout...
+                      </>
+                    ) : (
+                      <><Plus size={16} />Ajouter</>
+                    )}
                   </button>
                   <button type="button"
-                    onClick={() => { setShowForm(false); setNom(''); setPrenom(''); setProgramme(''); setPhoto(null); }}
+                    onClick={() => { setShowForm(false); resetForm(); }}
                     className="px-6 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm">
                     Annuler
                   </button>
@@ -271,6 +310,7 @@ export default function GestionCandidats() {
             </div>
           )}
 
+          {/* Liste candidats */}
           {loading ? (
             <div className="space-y-4">
               {[1,2,3].map(i => (
@@ -291,9 +331,7 @@ export default function GestionCandidats() {
               {/* Candidats réels */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-                  <h2 className="font-bold text-gray-800">
-                    Candidats réels
-                  </h2>
+                  <h2 className="font-bold text-gray-800">Candidats réels</h2>
                   <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">
                     {candidatsReels.length}
                   </span>
@@ -323,6 +361,12 @@ export default function GestionCandidats() {
                         <p className="font-bold text-gray-800 text-sm md:text-base">
                           {candidat.nom} {candidat.prenom || ''}
                         </p>
+                        {candidat.email && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Mail size={11} className="text-gray-400 flex-shrink-0" />
+                            <p className="text-gray-400 text-xs truncate">{candidat.email}</p>
+                          </div>
+                        )}
                         {candidat.programme && (
                           <p className="text-gray-500 text-xs md:text-sm mt-1 line-clamp-2">
                             {candidat.programme}
