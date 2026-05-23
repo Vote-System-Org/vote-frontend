@@ -55,6 +55,10 @@ export default function PageAccueil() {
               className="bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors">
               S'inscrire
             </Link>
+            <Link to="/verifier-vote"
+                className="text-blue-200 hover:text-white text-sm font-medium transition-colors hidden md:block">
+                Vérifier mon vote
+            </Link>
           </div>
         </div>
       </nav>
