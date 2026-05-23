@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Users, Vote, FileText, ShieldCheck,
-  LayoutDashboard, LogOut, Download,
+  LayoutDashboard, LogOut,
   Search, Printer, QrCode
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
