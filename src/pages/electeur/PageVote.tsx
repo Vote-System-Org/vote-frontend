@@ -117,17 +117,21 @@ export default function PageVote() {
                     : 'border-gray-200 bg-white hover:border-blue-300'
                 }`}
               >
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  {candidat.photo ? (
-                    <img
-                      src={candidat.photo}
-                      alt={candidat.nom}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <User size={24} className="text-blue-700" />
-                  )}
-                </div>
+                <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-blue-100 shadow-sm">
+  {candidat.photo ? (
+    <img
+      src={candidat.photo}
+      alt={`${candidat.nom} ${candidat.prenom || ''}`}
+      className="w-14 h-14 rounded-full object-cover object-center"
+    />
+  ) : (
+    <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-700 rounded-full flex items-center justify-center">
+      <span className="text-white font-bold text-lg">
+        {candidat.nom.charAt(0)}
+      </span>
+    </div>
+  )}
+</div>
                 <div className="flex-1">
                   <p className="font-semibold text-gray-800">
                     {candidat.nom} {candidat.prenom}
