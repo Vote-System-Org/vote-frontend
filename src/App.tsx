@@ -14,6 +14,9 @@ import PageVote           from './pages/electeur/PageVote';
 import PageConfirmation   from './pages/electeur/PageConfirmation';
 import PageRecu           from './pages/electeur/PageRecu';
 import MonProfil from './pages/electeur/MonProfil';
+import ResultatsPostCloture from './pages/electeur/ResultatsPostCloture';
+
+
 
 // ── Pages admin ───────────────────────────────────────────────────────────
 import DashboardAdmin     from './pages/admin/DashboardAdmin';
@@ -64,7 +67,9 @@ function AppRoutes() {
       <Route path="/espace/profil" element={
         <PrivateRoute><MonProfil /></PrivateRoute>
       }/>
-
+      <Route path="/espace/scrutin/:id/resultats" element={
+        <PrivateRoute><ResultatsPostCloture /></PrivateRoute>
+      }/>
       {/* ── Admin ─────────────────────────────────────────────────────── */}
       <Route path="/admin" element={
         <AdminRoute><DashboardAdmin /></AdminRoute>
