@@ -11,6 +11,7 @@ import PageResetPassword   from './pages/auth/PageResetPassword';
 import PageConfirmPassword from './pages/auth/PageConfirmPassword';
 import VerifierVote from './pages/public/VerifierVote';
 
+
 // ── Pages électeur ────────────────────────────────────────────────────────
 import DashboardElecteur  from './pages/electeur/DashboardElecteur';
 import PageVote           from './pages/electeur/PageVote';
