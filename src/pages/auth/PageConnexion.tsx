@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { LogIn, RefreshCw, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 import type { CaptchaData } from '../../types';
 
 export default function PageConnexion() {
-  const navigate = useNavigate();
+  const navigate     = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, isAuthenticated, isAdmin } = useAuth();
 
-  const [username, setUsername]           = useState('');
-  const [password, setPassword]           = useState('');
-  const [showPassword, setShowPassword]   = useState(false);
-  const [captcha, setCaptcha]             = useState<CaptchaData | null>(null);
-  const [captchaValue, setCaptchaValue]   = useState('');
-  const [error, setError]                 = useState('');
-  const [loading, setLoading]             = useState(false);
+  const [username, setUsername]         = useState(searchParams.get('matricule') || '');
+  const [password, setPassword]         = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [captcha, setCaptcha]           = useState<CaptchaData | null>(null);
+  const [captchaValue, setCaptchaValue] = useState('');
+  const [error, setError]               = useState('');
+  const [loading, setLoading]           = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !isAdmin) navigate('/espace/dashboard');
@@ -70,6 +71,11 @@ export default function PageConnexion() {
           </div>
           <h1 className="text-2xl font-bold text-blue-900">Vote Électronique</h1>
           <p className="text-gray-500 text-sm mt-1">Connectez-vous à votre compte</p>
+          {searchParams.get('matricule') && (
+            <div className="mt-3 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-xs">
+              Matricule pré-rempli depuis votre QR code
+            </div>
+          )}
         </div>
 
         {error && (
@@ -107,11 +113,9 @@ export default function PageConnexion() {
                 placeholder="Votre mot de passe"
                 required
               />
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
@@ -123,47 +127,34 @@ export default function PageConnexion() {
                 Code de sécurité
               </label>
               <div className="flex items-center gap-3 mb-2">
-                <img
-                  src={captcha.captcha_image_url}
-                  alt="CAPTCHA"
-                  className="h-12 rounded-lg border border-gray-200"
-                />
-                <button
-                  type="button"
-                  onClick={chargerCaptcha}
+                <img src={captcha.captcha_image_url} alt="CAPTCHA"
+                  className="h-12 rounded-lg border border-gray-200" />
+                <button type="button" onClick={chargerCaptcha}
                   className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-500"
-                  title="Rafraîchir le CAPTCHA"
-                >
+                  title="Rafraîchir le CAPTCHA">
                   <RefreshCw size={18} />
                 </button>
               </div>
-              <input
-                type="text"
-                value={captchaValue}
+              <input type="text" value={captchaValue}
                 onChange={(e) => setCaptchaValue(e.target.value.toUpperCase())}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Saisir le code ci-dessus"
-                required
-              />
+                required />
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 disabled:bg-blue-300 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
-          >
+          <button type="submit" disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 disabled:bg-blue-300 text-white font-semibold py-3 rounded-lg transition-colors duration-200">
             <LogIn size={18} />
             {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
-          <div className="text-center mt-3">
-          <Link
-            to="/mot-de-passe/reset"
-            className="text-sm text-gray-400 hover:text-blue-900 transition-colors"
-          >
-            Mot de passe oublié ?
-          </Link>
-</div>
+
+          <div className="text-center">
+            <Link to="/mot-de-passe/reset"
+              className="text-sm text-gray-400 hover:text-blue-900 transition-colors">
+              Mot de passe oublié ?
+            </Link>
+          </div>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
