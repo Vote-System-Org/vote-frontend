@@ -47,30 +47,39 @@ export default function PageAccueil() {
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* ── Navbar ─────────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 md:px-8 py-4">
-  <div className="max-w-6xl mx-auto flex items-center justify-between">
-    <div className="flex items-center gap-3">
-      <div className="w-9 h-9 bg-blue-900 rounded-lg flex items-center justify-center">
-        <ShieldCheck className="text-white" size={20} />
-      </div>
-      <span className="text-blue-900 font-bold text-lg">VoteSystem</span>
-    </div>
-    <div className="flex items-center gap-2 md:gap-4">
-      <Link to="/verifier-vote"
-        className="hidden md:flex items-center gap-1.5 text-sm font-medium text-blue-900 border border-blue-200 hover:border-blue-900 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all group">
-        <ShieldCheck size={15} className="group-hover:scale-110 transition-transform" />
-        Vérifier mon vote
-      </Link>
-      <Link to="/connexion"
-        className="text-gray-600 text-sm font-medium hover:text-blue-900 transition-colors hidden md:block">
-        Se connecter
-      </Link>
-      <Link to="/inscription"
-        className="bg-blue-900 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-blue-800 transition-all hover:shadow-md hover:-translate-y-0.5">
-        S'inscrire
-      </Link>
-    </div>
-  </div>
-</nav>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-blue-900 rounded-lg flex items-center justify-center">
+              <ShieldCheck className="text-white" size={20} />
+            </div>
+            <span className="text-blue-900 font-bold text-lg">VoteSystem</span>
+          </div>
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link
+              to="/verifier-vote"
+              className="flex items-center gap-1.5 text-sm font-medium text-blue-900 border border-blue-200 hover:border-blue-900 hover:bg-blue-50 px-3 md:px-4 py-2 rounded-lg transition-all group"
+            >
+              <ShieldCheck
+                size={15}
+                className="group-hover:scale-110 transition-transform"
+              />
+              <span className="hidden md:block">Vérifier mon vote</span>
+            </Link>
+            <Link
+              to="/connexion"
+              className="text-gray-600 text-sm font-medium hover:text-blue-900 transition-colors hidden md:block"
+            >
+              Se connecter
+            </Link>
+            <Link
+              to="/inscription"
+              className="bg-blue-900 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-blue-800 transition-all hover:shadow-md hover:-translate-y-0.5"
+            >
+              S'inscrire
+            </Link>
+          </div>
+        </div>
+      </nav>
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
       <section className="pt-28 md:pt-36 pb-20 md:pb-28 px-4 md:px-8 bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 relative overflow-hidden">
