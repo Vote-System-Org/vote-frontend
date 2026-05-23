@@ -42,43 +42,91 @@ export default function PageAccueil() {
       month: "long",
       year: "numeric",
     });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* ── Navbar ─────────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 md:px-8 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3">
             <div className="w-9 h-9 bg-blue-900 rounded-lg flex items-center justify-center">
               <ShieldCheck className="text-white" size={20} />
             </div>
             <span className="text-blue-900 font-bold text-lg">VoteSystem</span>
-          </div>
-          <div className="flex items-center gap-2 md:gap-4">
+          </Link>
+
+          {/* Desktop links */}
+          <div className="hidden md:flex items-center gap-4">
             <Link
               to="/verifier-vote"
-              className="w-9 h-9 flex items-center justify-center text-blue-900 border border-blue-200 hover:border-blue-900 hover:bg-blue-50 rounded-lg transition-all group"
-              title="Vérifier mon vote"
+              className="flex items-center gap-1.5 text-sm font-medium text-blue-900 border border-blue-200 hover:border-blue-900 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all group"
             >
               <ShieldCheck
-                size={16}
+                size={15}
                 className="group-hover:scale-110 transition-transform"
               />
+              Vérifier mon vote
             </Link>
             <Link
               to="/connexion"
-              className="text-gray-600 text-sm font-medium hover:text-blue-900 transition-colors hidden md:block"
+              className="text-gray-600 text-sm font-medium hover:text-blue-900 transition-colors"
             >
               Se connecter
             </Link>
             <Link
               to="/inscription"
-              className="bg-blue-900 text-white text-sm font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-lg hover:bg-blue-800 transition-all hover:shadow-md"
+              className="bg-blue-900 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-blue-800 transition-all hover:shadow-md"
             >
               S'inscrire
             </Link>
           </div>
+
+          {/* Mobile — bouton hamburger */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            <div
+              className={`w-5 h-0.5 bg-gray-700 transition-all ${menuOpen ? "rotate-45 translate-y-2" : ""}`}
+            />
+            <div
+              className={`w-5 h-0.5 bg-gray-700 transition-all ${menuOpen ? "opacity-0" : ""}`}
+            />
+            <div
+              className={`w-5 h-0.5 bg-gray-700 transition-all ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}
+            />
+          </button>
         </div>
+
+        {/* Menu mobile déroulant */}
+        {menuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-2">
+            <Link
+              to="/verifier-vote"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-blue-900 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+            >
+              <ShieldCheck size={16} />
+              Vérifier mon vote
+            </Link>
+            <Link
+              to="/connexion"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
+            >
+              Se connecter
+            </Link>
+            <Link
+              to="/inscription"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition-colors"
+            >
+              S'inscrire
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
