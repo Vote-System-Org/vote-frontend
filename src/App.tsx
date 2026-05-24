@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import type { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
+import Page404 from './pages/public/Page404';
 // ── Pages publiques ───────────────────────────────────────────────────────
 import PageAccueil        from './pages/public/PageAccueil';
 import PageConnexion      from './pages/auth/PageConnexion';
@@ -109,6 +110,7 @@ function AppRoutes() {
 
       {/* ── Fallback ──────────────────────────────────────────────────── */}
       <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Page404 />} />
     </Routes>
   );
 }
