@@ -62,7 +62,7 @@ export default function DashboardAdmin() {
   };
 
   const scrutinsOuverts   = scrutins.filter((s) => s.statut === "OUVERT").length;
-  const scrutinsBrouillon = scrutins.filter((s) => s.statut === "BROUILLON").length;
+
   const scrutinsClotures  = scrutins.filter((s) => s.statut === "CLOTURE").length;
 
   const navLinks = [
