@@ -3,34 +3,44 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, Vote, Users, FileText,
   AlertCircle, CheckCircle, RefreshCw,
-  LayoutDashboard, LogOut, Hash
+  LayoutDashboard, LogOut, Hash,
+  ChevronLeft, ChevronRight, QrCode
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../hooks/useToast';
 import api from '../../api/axios';
 import type { LogAudit } from '../../types';
 
+const PAGE_SIZE = 15;
+
 export default function LogsAudit() {
-  const { logout }   = useAuth();
-  const navigate     = useNavigate();
+  const { logout } = useAuth();
+  const navigate   = useNavigate();
+  const toast      = useToast();
 
   const [logs, setLogs]                 = useState<LogAudit[]>([]);
   const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState('');
   const [integrite, setIntegrite]       = useState<boolean | null>(null);
   const [filtreAction, setFiltreAction] = useState('');
   const [sidebarOpen, setSidebarOpen]   = useState(false);
   const [verifLoading, setVerifLoading] = useState(false);
+  const [page, setPage]                 = useState(1);
+  const [total, setTotal]               = useState(0);
 
-  useEffect(() => { chargerLogs(); }, [filtreAction]);
+  useEffect(() => { chargerLogs(); }, [filtreAction, page]);
 
   const chargerLogs = async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (filtreAction) params.append('action', filtreAction);
+      params.append('page', String(page));
+      params.append('page_size', String(PAGE_SIZE));
       const response = await api.get(`/admin/audit/logs/?${params}`);
       setLogs(response.data.results || response.data);
+      setTotal(response.data.count || response.data.length);
     } catch {
-      setError('Erreur lors du chargement des logs.');
+      toast.error('Erreur lors du chargement des logs.');
     } finally {
       setLoading(false);
     }
@@ -41,8 +51,13 @@ export default function LogsAudit() {
     try {
       const response = await api.get('/admin/audit/integrite/');
       setIntegrite(response.data.integre);
+      if (response.data.integre) {
+        toast.success('Chaîne d\'audit intègre — aucune altération détectée.');
+      } else {
+        toast.error('Rupture de chaîne détectée — des logs ont été altérés !');
+      }
     } catch {
-      setError('Erreur lors de la vérification.');
+      toast.error('Erreur lors de la vérification.');
     } finally {
       setVerifLoading(false);
     }
@@ -59,12 +74,15 @@ export default function LogsAudit() {
       hour: '2-digit', minute: '2-digit',
     });
 
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
   const navLinks = [
     { to: '/admin',               icon: <LayoutDashboard size={18} />, label: 'Tableau de bord' },
     { to: '/admin/scrutins',      icon: <Vote size={18} />,            label: 'Scrutins' },
     { to: '/admin/electeurs',     icon: <Users size={18} />,           label: 'Électeurs' },
     { to: '/admin/liste-blanche', icon: <FileText size={18} />,        label: 'Liste blanche' },
     { to: '/admin/audit',         icon: <ShieldCheck size={18} />,     label: "Logs d'audit", active: true },
+    { to: '/admin/qrcodes',       icon: <QrCode size={18} />,          label: 'QR Codes' },
   ];
 
   const badgeAction = (action: string) => {
@@ -159,11 +177,11 @@ export default function LogsAudit() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-blue-900">Logs d'audit</h1>
               <p className="text-gray-500 text-sm mt-1">
-                Journalisation chaînée SHA-256 — immuable
+                Journalisation chaînée SHA-256 — {total} entrée(s)
               </p>
             </div>
             <button onClick={verifierIntegrite} disabled={verifLoading}
-              className="flex items-center gap-2 border border-blue-900 text-blue-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-colors text-sm disabled:opacity-50">
+              className="flex items-center gap-2 border border-blue-900 text-blue-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-colors text-sm disabled:opacity-50 self-start">
               <RefreshCw size={16} className={verifLoading ? 'animate-spin' : ''} />
               Vérifier l'intégrité
             </button>
@@ -183,22 +201,15 @@ export default function LogsAudit() {
             </div>
           )}
 
-          {/* Erreur */}
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 text-sm">
-              <AlertCircle size={16} />{error}
-            </div>
-          )}
-
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
-              { label: 'Total logs', value: logs.length, color: 'text-blue-900' },
-              { label: 'Votes', value: logs.filter(l => l.action === 'VOTE').length, color: 'text-purple-600' },
-              { label: 'Connexions', value: logs.filter(l => l.action === 'CONNEXION').length, color: 'text-blue-500' },
-              { label: 'Inscriptions', value: logs.filter(l => l.action === 'INSCRIPTION').length, color: 'text-green-600' },
+              { label: 'Total logs',   value: total,                                              color: 'text-blue-900',   bg: 'bg-blue-50'   },
+              { label: 'Votes',        value: logs.filter(l => l.action === 'VOTE').length,       color: 'text-purple-600', bg: 'bg-purple-50' },
+              { label: 'Connexions',   value: logs.filter(l => l.action === 'CONNEXION').length,  color: 'text-blue-500',   bg: 'bg-blue-50'   },
+              { label: 'Inscriptions', value: logs.filter(l => l.action === 'INSCRIPTION').length, color: 'text-green-600', bg: 'bg-green-50'  },
             ].map((stat, i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+              <div key={i} className={`${stat.bg} rounded-2xl p-4 border border-gray-100 text-center`}>
                 <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
                 <p className="text-gray-500 text-xs mt-1">{stat.label}</p>
               </div>
@@ -208,7 +219,7 @@ export default function LogsAudit() {
           {/* Filtre */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
             <select value={filtreAction}
-              onChange={(e) => setFiltreAction(e.target.value)}
+              onChange={(e) => { setFiltreAction(e.target.value); setPage(1); }}
               className="px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
               <option value="">Toutes les actions</option>
               <option value="CONNEXION">Connexion</option>
@@ -234,7 +245,7 @@ export default function LogsAudit() {
             </div>
           ) : (
             <>
-              {/* Vue mobile — cartes */}
+              {/* Vue mobile */}
               <div className="block md:hidden space-y-3">
                 {logs.map((log) => (
                   <div key={log.id}
@@ -252,9 +263,15 @@ export default function LogsAudit() {
                     </div>
                   </div>
                 ))}
+                {logs.length === 0 && (
+                  <div className="bg-white rounded-2xl p-10 text-center border border-gray-100">
+                    <ShieldCheck className="mx-auto text-gray-200 mb-3" size={40} />
+                    <p className="text-gray-400 text-sm">Aucun log disponible.</p>
+                  </div>
+                )}
               </div>
 
-              {/* Vue desktop — tableau */}
+              {/* Vue desktop */}
               <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-100">
@@ -296,6 +313,47 @@ export default function LogsAudit() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6 bg-white rounded-2xl px-5 py-3 border border-gray-100 shadow-sm">
+                  <p className="text-gray-400 text-sm">
+                    Page <span className="font-semibold text-gray-700">{page}</span> sur{' '}
+                    <span className="font-semibold text-gray-700">{totalPages}</span>
+                    {' '}— {total} log(s)
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                      <ChevronLeft size={16} />
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                      .map((p, i, arr) => (
+                        <>
+                          {i > 0 && arr[i-1] !== p - 1 && (
+                            <span key={`dots-${p}`} className="text-gray-400 text-sm px-1">...</span>
+                          )}
+                          <button key={p} onClick={() => setPage(p)}
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-semibold transition-colors ${
+                              page === p
+                                ? 'bg-blue-900 text-white'
+                                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                            }`}>
+                            {p}
+                          </button>
+                        </>
+                      ))
+                    }
+                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </main>
