@@ -2,36 +2,47 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Users, Search, CheckCircle, XCircle,
-  Vote, FileText, ShieldCheck, AlertCircle,
-  LayoutDashboard, LogOut, UserCheck, UserX
+  Vote, FileText, ShieldCheck,
+  LayoutDashboard, LogOut, UserCheck, UserX,
+  ChevronLeft, ChevronRight, QrCode
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../hooks/useToast';
 import api from '../../api/axios';
 import type { Electeur } from '../../types';
 
+const PAGE_SIZE = 10;
+
 export default function GestionElecteurs() {
-  const { logout }   = useAuth();
-  const navigate     = useNavigate();
+  const { logout } = useAuth();
+  const navigate   = useNavigate();
+  const toast      = useToast();
 
   const [electeurs, setElecteurs]       = useState<Electeur[]>([]);
   const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState('');
-  const [success, setSuccess]           = useState('');
   const [search, setSearch]             = useState('');
   const [filtreStatut, setFiltreStatut] = useState('');
   const [sidebarOpen, setSidebarOpen]   = useState(false);
+  const [page, setPage]                 = useState(1);
+  const [total, setTotal]               = useState(0);
 
-  useEffect(() => { chargerElecteurs(); }, [filtreStatut]);
+  useEffect(() => {
+    chargerElecteurs();
+  }, [filtreStatut, page]);
 
   const chargerElecteurs = async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (filtreStatut) params.append('statut', filtreStatut);
       if (search)       params.append('search', search);
+      params.append('page', String(page));
+      params.append('page_size', String(PAGE_SIZE));
       const response = await api.get(`/admin/electeurs/?${params}`);
       setElecteurs(response.data.results || response.data);
+      setTotal(response.data.count || response.data.length);
     } catch {
-      setError('Erreur lors du chargement des électeurs.');
+      toast.error('Erreur lors du chargement des électeurs.');
     } finally {
       setLoading(false);
     }
@@ -40,17 +51,17 @@ export default function GestionElecteurs() {
   const changerStatut = async (id: number, statut: string) => {
     try {
       await api.patch(`/admin/electeurs/${id}/statut/`, { statut });
-      setSuccess(`Statut mis à jour avec succès.`);
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Statut mis à jour avec succès.');
       chargerElecteurs();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Erreur changement statut.');
+      toast.error(error.response?.data?.message || 'Erreur changement statut.');
     }
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setPage(1);
     chargerElecteurs();
   };
 
@@ -59,12 +70,18 @@ export default function GestionElecteurs() {
     navigate('/connexion');
   };
 
+  const totalPages   = Math.ceil(total / PAGE_SIZE);
+  const nbEligibles  = electeurs.filter(e => e.statut === 'ELIGIBLE').length;
+  const nbSuspendus  = electeurs.filter(e => e.statut === 'SUSPENDU').length;
+  const nbAttenteVal = electeurs.filter(e => e.statut === 'EN_ATTENTE').length;
+
   const navLinks = [
     { to: '/admin',               icon: <LayoutDashboard size={18} />, label: 'Tableau de bord' },
     { to: '/admin/scrutins',      icon: <Vote size={18} />,            label: 'Scrutins' },
     { to: '/admin/electeurs',     icon: <Users size={18} />,           label: 'Électeurs', active: true },
     { to: '/admin/liste-blanche', icon: <FileText size={18} />,        label: 'Liste blanche' },
     { to: '/admin/audit',         icon: <ShieldCheck size={18} />,     label: "Logs d'audit" },
+    { to: '/admin/qrcodes',       icon: <QrCode size={18} />,          label: 'QR Codes' },
   ];
 
   const badgeStatut = (statut: string) => {
@@ -77,10 +94,6 @@ export default function GestionElecteurs() {
         return <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">EN ATTENTE</span>;
     }
   };
-
-  const nbEligibles  = electeurs.filter(e => e.statut === 'ELIGIBLE').length;
-  const nbSuspendus  = electeurs.filter(e => e.statut === 'SUSPENDU').length;
-  const nbAttenteVal = electeurs.filter(e => e.statut === 'EN_ATTENTE').length;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -153,35 +166,23 @@ export default function GestionElecteurs() {
           {/* En-tête */}
           <div className="mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-blue-900">Électeurs</h1>
-            <p className="text-gray-500 text-sm mt-1">Gérer les comptes électeurs</p>
+            <p className="text-gray-500 text-sm mt-1">
+              {total} électeur(s) au total
+            </p>
           </div>
-
-          {/* Messages */}
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 text-sm">
-              <AlertCircle size={16} />{error}
-            </div>
-          )}
-          {success && (
-            <div className="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-xl mb-6 text-sm">
-              {success}
-            </div>
-          )}
 
           {/* Stats rapides */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p className="text-2xl font-bold text-green-600">{nbEligibles}</p>
-              <p className="text-gray-500 text-xs mt-1">Éligibles</p>
-            </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p className="text-2xl font-bold text-amber-500">{nbAttenteVal}</p>
-              <p className="text-gray-500 text-xs mt-1">En attente</p>
-            </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p className="text-2xl font-bold text-red-500">{nbSuspendus}</p>
-              <p className="text-gray-500 text-xs mt-1">Suspendus</p>
-            </div>
+            {[
+              { value: nbEligibles,  label: 'Éligibles',  color: 'text-green-600', bg: 'bg-green-50' },
+              { value: nbAttenteVal, label: 'En attente', color: 'text-amber-500', bg: 'bg-amber-50' },
+              { value: nbSuspendus,  label: 'Suspendus',  color: 'text-red-500',   bg: 'bg-red-50'   },
+            ].map((stat, i) => (
+              <div key={i} className={`${stat.bg} rounded-2xl p-4 border border-gray-100 text-center`}>
+                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                <p className="text-gray-500 text-xs mt-1">{stat.label}</p>
+              </div>
+            ))}
           </div>
 
           {/* Filtres */}
@@ -193,8 +194,7 @@ export default function GestionElecteurs() {
                   <input type="text" value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Rechercher par matricule, nom..."
-                    className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                    className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <button type="submit"
                   className="bg-blue-900 text-white px-4 py-2.5 rounded-xl text-sm hover:bg-blue-800 transition-colors">
@@ -202,7 +202,7 @@ export default function GestionElecteurs() {
                 </button>
               </form>
               <select value={filtreStatut}
-                onChange={(e) => setFiltreStatut(e.target.value)}
+                onChange={(e) => { setFiltreStatut(e.target.value); setPage(1); }}
                 className="px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Tous les statuts</option>
                 <option value="ELIGIBLE">Éligible</option>
@@ -212,7 +212,7 @@ export default function GestionElecteurs() {
             </div>
           </div>
 
-          {/* Liste électeurs */}
+          {/* Liste */}
           {loading ? (
             <div className="space-y-3">
               {[1,2,3,4].map(i => (
@@ -224,7 +224,7 @@ export default function GestionElecteurs() {
             </div>
           ) : (
             <>
-              {/* Vue mobile — cartes */}
+              {/* Vue mobile */}
               <div className="block md:hidden space-y-3">
                 {electeurs.map((electeur) => (
                   <div key={electeur.id}
@@ -248,15 +248,13 @@ export default function GestionElecteurs() {
                           : <XCircle size={16} className="text-gray-300" />
                         }
                         {electeur.statut !== 'SUSPENDU' ? (
-                          <button
-                            onClick={() => changerStatut(electeur.id, 'SUSPENDU')}
+                          <button onClick={() => changerStatut(electeur.id, 'SUSPENDU')}
                             className="flex items-center gap-1 text-xs bg-red-50 text-red-600 px-2.5 py-1.5 rounded-lg hover:bg-red-100 transition-colors">
                             <UserX size={12} />
                             Suspendre
                           </button>
                         ) : (
-                          <button
-                            onClick={() => changerStatut(electeur.id, 'ELIGIBLE')}
+                          <button onClick={() => changerStatut(electeur.id, 'ELIGIBLE')}
                             className="flex items-center gap-1 text-xs bg-green-50 text-green-600 px-2.5 py-1.5 rounded-lg hover:bg-green-100 transition-colors">
                             <UserCheck size={12} />
                             Réactiver
@@ -266,9 +264,15 @@ export default function GestionElecteurs() {
                     </div>
                   </div>
                 ))}
+                {electeurs.length === 0 && (
+                  <div className="bg-white rounded-2xl p-10 text-center border border-gray-100">
+                    <Users className="mx-auto text-gray-200 mb-3" size={40} />
+                    <p className="text-gray-400 text-sm">Aucun électeur trouvé.</p>
+                  </div>
+                )}
               </div>
 
-              {/* Vue desktop — tableau */}
+              {/* Vue desktop */}
               <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-100">
@@ -305,15 +309,13 @@ export default function GestionElecteurs() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             {electeur.statut !== 'SUSPENDU' ? (
-                              <button
-                                onClick={() => changerStatut(electeur.id, 'SUSPENDU')}
+                              <button onClick={() => changerStatut(electeur.id, 'SUSPENDU')}
                                 className="flex items-center gap-1 text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors">
                                 <UserX size={12} />
                                 Suspendre
                               </button>
                             ) : (
-                              <button
-                                onClick={() => changerStatut(electeur.id, 'ELIGIBLE')}
+                              <button onClick={() => changerStatut(electeur.id, 'ELIGIBLE')}
                                 className="flex items-center gap-1 text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors">
                                 <UserCheck size={12} />
                                 Réactiver
@@ -333,6 +335,47 @@ export default function GestionElecteurs() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6 bg-white rounded-2xl px-5 py-3 border border-gray-100 shadow-sm">
+                  <p className="text-gray-400 text-sm">
+                    Page <span className="font-semibold text-gray-700">{page}</span> sur{' '}
+                    <span className="font-semibold text-gray-700">{totalPages}</span>
+                    {' '}— {total} électeur(s)
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                      <ChevronLeft size={16} />
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                      .map((p, i, arr) => (
+                        <>
+                          {i > 0 && arr[i-1] !== p - 1 && (
+                            <span key={`dots-${p}`} className="text-gray-400 text-sm px-1">...</span>
+                          )}
+                          <button key={p} onClick={() => setPage(p)}
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-semibold transition-colors ${
+                              page === p
+                                ? 'bg-blue-900 text-white'
+                                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                            }`}>
+                            {p}
+                          </button>
+                        </>
+                      ))
+                    }
+                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </main>
