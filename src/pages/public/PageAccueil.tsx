@@ -28,13 +28,16 @@ export default function PageAccueil() {
   }, []);
 
   const chargerScrutinsClotures = async () => {
-    try {
-      const response = await api.get("/public/scrutins/clotures/");
-      setScrutinsClotures(response.data.results || response.data);
-    } catch {
-      // Silencieux
-    }
-  };
+  try {
+    const response = await api.get("/public/scrutins/clotures/");
+    const data = response.data;
+    const liste = Array.isArray(data) ? data :
+                  Array.isArray(data?.results) ? data.results : [];
+    setScrutinsClotures(liste);
+  } catch {
+    setScrutinsClotures([]);
+  }
+};
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("fr-FR", {
