@@ -4,14 +4,14 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Installer les dépendances
-COPY package*.json .
+COPY package.json package-lock.json* ./
 RUN npm ci --silent
 
 # Copier le code source
 COPY . .
 
 # Build de production
-ARG VITE_API_BASE_URL=https://vote-backend-api.onrender.com/api/v1
+ARG VITE_API_BASE_URL=http://localhost:8000/api/v1
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 RUN npm run build
