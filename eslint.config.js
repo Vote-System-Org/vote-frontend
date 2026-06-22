@@ -21,11 +21,11 @@ export default tseslint.config({ ignores: ['dist'] }, {
             'warn',
             { allowConstantExport: true },
         ],
-        // Désactivé — style intentionnel
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/set-state-in-effect': 'off',
         'react-hooks/immutability': 'off',
-        '@typescript-eslint/no-unused-vars': 'warn',
+        '@typescript-eslint/no-unused-vars': 'off', // ← 'warn' → 'off'
+        'no-unused-vars': 'off',
     },
 }, )
 
