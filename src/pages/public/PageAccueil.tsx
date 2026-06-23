@@ -30,7 +30,7 @@ export default function PageAccueil() {
   const [visible, setVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrutinsExpanded, setScrutinsExpanded] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
+  // const [aboutOpen, setAboutOpen] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 800, once: true, easing: "ease-out-cubic" });
@@ -80,12 +80,11 @@ export default function PageAccueil() {
 
           <div className="hidden md:flex items-center gap-4">
             <button
-              onClick={() => {
-                setAboutOpen(true);
+              onClick={() =>
                 document
                   .getElementById("about")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="text-gray-600 text-sm font-medium hover:text-blue-900 transition-colors"
             >
               À propos

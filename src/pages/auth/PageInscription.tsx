@@ -18,10 +18,11 @@ export default function PageInscription() {
   const [captcha, setCaptcha] = useState<CaptchaData | null>(null);
   const [captchaValue, setCaptchaValue] = useState("");
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
-  const [otpCode, setOtpCode] = useState("");
+  // const [otpCode, setOtpCode] = useState("");
   const [emailMasque, setEmailMasque] = useState("");
   const [matriculeOtp, setMatriculeOtp] = useState("");
   const [renvoi, setRenvoi] = useState(false);
+
   const [compteur, setCompteur] = useState(0);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -70,7 +71,7 @@ export default function PageInscription() {
     const next = [...otpDigits];
     next[index] = digit;
     setOtpDigits(next);
-    setOtpCode(next.join(""));
+    // setOtpCode(next.join(""));
     if (digit && index < 5) otpRefs.current[index + 1]?.focus();
   };
 
@@ -93,7 +94,7 @@ export default function PageInscription() {
       next[i] = d;
     });
     setOtpDigits(next);
-    setOtpCode(next.join(""));
+    // setOtpCode(next.join(""));
     otpRefs.current[Math.min(pasted.length, 5)]?.focus();
   };
 
@@ -122,7 +123,7 @@ export default function PageInscription() {
       setMatriculeOtp(matricule);
       setCompteur(60);
       setOtpDigits(["", "", "", "", "", ""]);
-      setOtpCode("");
+      // setOtpCode("");
       setEtape("otp");
     } catch (err: unknown) {
       const e = err as {
@@ -163,7 +164,7 @@ export default function PageInscription() {
       const e = err as { response?: { data?: { message?: string } } };
       setError(e.response?.data?.message || "Code incorrect ou expiré.");
       setOtpDigits(["", "", "", "", "", ""]);
-      setOtpCode("");
+      // setOtpCode("");
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
     } finally {
       setLoading(false);
@@ -180,7 +181,7 @@ export default function PageInscription() {
       });
       setCompteur(60);
       setOtpDigits(["", "", "", "", "", ""]);
-      setOtpCode("");
+      // setOtpCode("");
       setSuccess("Nouveau code envoyé.");
       setTimeout(() => setSuccess(""), 4000);
     } catch {
@@ -193,7 +194,7 @@ export default function PageInscription() {
   const retourFormulaire = () => {
     setEtape("formulaire");
     setOtpDigits(["", "", "", "", "", ""]);
-    setOtpCode("");
+    // setOtpCode("");
     setError("");
     setSuccess("");
     chargerCaptcha();
